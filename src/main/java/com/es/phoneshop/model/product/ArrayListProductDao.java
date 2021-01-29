@@ -1,5 +1,7 @@
 package com.es.phoneshop.model.product;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,12 +15,17 @@ public class ArrayListProductDao implements ProductDao {
         saveSampleProducts();
     }
 
+    @Nullable
     @Override
-    public synchronized Product getProduct(Long id) throws ProductNotFoundException {
-        return products.stream()
-                .filter(product -> id.equals(product.getId()))
-                .findAny()
-                .orElseThrow(ProductNotFoundException::new);
+    public synchronized Product getProduct(@Nullable Long id) throws ProductNotFoundException {
+        if (id != null) {
+            return products.stream()
+                    .filter(product -> id.equals(product.getId()))
+                    .findAny()
+                    .orElseThrow(ProductNotFoundException::new);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -30,30 +37,34 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public synchronized void save(Product product) {
-        if (product.getId() != null) {
-            Long id = product.getId();
-            Optional<Product> optionalProduct = products.stream()
-                    .filter(p -> id.equals(p.getId()))
-                    .findAny();
-            if (!optionalProduct.isPresent()) {
-                products.add(product);
+    public synchronized void save(@Nullable Product product) {
+        if (product != null) {
+            if (product.getId() != null) {
+                Long id = product.getId();
+                Optional<Product> optionalProduct = products.stream()
+                        .filter(p -> id.equals(p.getId()))
+                        .findAny();
+                if (!optionalProduct.isPresent()) {
+                    products.add(product);
+                } else {
+                    Collections.replaceAll(products, optionalProduct.get(), product);
+                }
             } else {
-                Collections.replaceAll(products, optionalProduct.get(), product);
+                product.setId(maxId++);
+                products.add(product);
             }
-        } else {
-            product.setId(maxId++);
-            products.add(product);
         }
     }
 
     @Override
-    public synchronized void delete(Long id) throws ProductNotFoundException {
-        Product deletingProduct = products.stream()
-                .filter(product -> id.equals(product.getId()))
-                .findAny()
-                .orElseThrow(ProductNotFoundException::new);
-        products.remove(deletingProduct);
+    public synchronized void delete(@Nullable Long id) throws ProductNotFoundException {
+        if (id != null) {
+            Product deletingProduct = products.stream()
+                    .filter(product -> id.equals(product.getId()))
+                    .findAny()
+                    .orElseThrow(ProductNotFoundException::new);
+            products.remove(deletingProduct);
+        }
     }
 
     private void saveSampleProducts() {

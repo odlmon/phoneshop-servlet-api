@@ -86,4 +86,11 @@ public class ArrayListProductDaoTest
         Product result = productDao.getProduct(product.getId());
         assertNull(result);
     }
+
+    @Test
+    public void testProductDaoMethodsWithNullValuePassed() throws ProductNotFoundException {
+        assertNull(productDao.getProduct(null));
+        productDao.delete(null);
+        productDao.save(null);
+    }
 }
