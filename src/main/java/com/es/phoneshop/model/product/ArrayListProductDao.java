@@ -1,10 +1,7 @@
 package com.es.phoneshop.model.product;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Currency;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ArrayListProductDao implements ProductDao {
@@ -36,14 +33,13 @@ public class ArrayListProductDao implements ProductDao {
     public synchronized void save(Product product) {
         if (product.getId() != null) {
             Long id = product.getId();
-            if (products.stream().noneMatch(p -> id.equals(p.getId()))) {
+            Optional<Product> optionalProduct = products.stream()
+                    .filter(p -> id.equals(p.getId()))
+                    .findAny();
+            if (!optionalProduct.isPresent()) {
                 products.add(product);
             } else {
-                Product oldProduct = products.stream()
-                        .filter(p -> id.equals(p.getId()))
-                        .findAny()
-                        .get();
-                Collections.replaceAll(products, oldProduct, product);
+                Collections.replaceAll(products, optionalProduct.get(), product);
             }
         } else {
             product.setId(maxId++);
