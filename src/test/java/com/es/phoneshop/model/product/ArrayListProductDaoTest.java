@@ -10,11 +10,15 @@ import static org.junit.Assert.*;
 
 public class ArrayListProductDaoTest
 {
-    private ProductDao productDao;
+    private ArrayListProductDao productDao;
+    private Currency usd;
+    private Product product;
 
     @Before
     public void setup() {
         productDao = new ArrayListProductDao();
+        usd = Currency.getInstance("USD");
+        product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
     }
 
     @Test
@@ -23,74 +27,130 @@ public class ArrayListProductDaoTest
     }
 
     @Test
-    public void testSaveNewProduct() {
-        Currency usd = Currency.getInstance("USD");
-        Product product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
-
-        assertTrue(product.getId() > 0);
+    public void testGetProducts() {
         try {
-            Product result = productDao.getProduct(product.getId());
-            assertNotNull(result);
-            assertEquals("test-product", result.getCode());
+            productDao.save(product);
+            Product savedProduct = productDao.getProduct(product.getId());
+            assertEquals(product.getCode(), savedProduct.getCode());
+        } catch (NullValuePassedException e) {
+            fail("Null value passed");
         } catch (ProductNotFoundException e) {
-            e.printStackTrace();
+            fail("Product not found");
+        }
+    }
+
+    @Test
+    public void testGetProductWithNullValuePassed() {
+        Product product = null;
+        try {
+            product = productDao.getProduct(null);
+            fail("Unexpected behaviour");
+        } catch (NullValuePassedException e) {
+            assertNull(product);
+        } catch (ProductNotFoundException e) {
+            fail("Unexpected behaviour");
+        }
+    }
+
+    @Test
+    public void testGetProductWhichIsMissing() {
+        Product product = null;
+        try {
+            product = productDao.getProduct(1000L);
+            fail("Unexpected behaviour");
+        } catch (NullValuePassedException e) {
+            fail("Unexpected behaviour");
+        } catch (ProductNotFoundException e) {
+            assertNull(product);
+        }
+    }
+
+    @Test
+    public void testSaveNewProduct() {
+        try {
+            productDao.save(product);
+            Product savedProduct = productDao.getProduct(product.getId());
+            assertEquals(product.getCode(), savedProduct.getCode());
+        } catch (NullValuePassedException e) {
+            fail("Unexpected behaviour");
+        } catch (ProductNotFoundException e) {
+            fail("Product not found");
         }
     }
 
     @Test
     public void testSaveModifiedProduct() {
-        Currency usd = Currency.getInstance("USD");
-        Product product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
-
         try {
+            productDao.save(product);
             Product modifiedProduct = productDao.getProduct(product.getId());
             modifiedProduct.setCode("test-product1");
             Long oldId = product.getId();
             productDao.save(modifiedProduct);
-            modifiedProduct = productDao.getProduct(product.getId());
+            modifiedProduct = productDao.getProduct(oldId);
             assertEquals(oldId, modifiedProduct.getId());
             assertNotEquals(null, "test-product", modifiedProduct.getCode());
+        } catch (NullValuePassedException e) {
+            fail("Unexpected behaviour");
         } catch (ProductNotFoundException e) {
-            e.printStackTrace();
+            fail("Product not found");
         }
     }
 
     @Test
-    public void testSaveProductWithoutGeneratingId() {
+    public void testSaveProductWithPredefinedId() {
         Long predefinedId = 228L;
-        Currency usd = Currency.getInstance("USD");
         Product product = new Product(predefinedId,"test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
-
         try {
+            productDao.save(product);
             productDao.getProduct(predefinedId);
+        } catch (NullValuePassedException e) {
+            fail("Unexpected behaviour");
         } catch (ProductNotFoundException e) {
-            e.printStackTrace();
+            fail("Product not found");
         }
-    }
-
-    @Test(expected = ProductNotFoundException.class)
-    public void testDeleteProduct() throws ProductNotFoundException {
-        Currency usd = Currency.getInstance("USD");
-        Product product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao.save(product);
-        try {
-            Product result = productDao.getProduct(product.getId());
-            assertNotNull(result);
-            productDao.delete(product.getId());
-        } catch (ProductNotFoundException e) {
-            e.printStackTrace();
-        }
-        Product result = productDao.getProduct(product.getId());
-        assertNull(result);
     }
 
     @Test
-    public void testProductDaoMethodsWithNullValuePassed() throws ProductNotFoundException {
-        assertNull(productDao.getProduct(null));
-        productDao.delete(null);
-        productDao.save(null);
+    public void testSaveProductWithNullValuePassed() {
+        try {
+            productDao.save(null);
+            fail("Unexpected behaviour");
+        } catch (NullValuePassedException ignored) {
+
+        }
+    }
+
+    @Test
+    public void testDeleteProduct() {
+        try {
+            productDao.save(product);
+            int beforeSize = productDao.findProducts().size();
+            productDao.delete(product.getId());
+            int afterSize = productDao.findProducts().size();
+            assertNotEquals(afterSize, beforeSize);
+        } catch (NullValuePassedException e) {
+            fail("Unexpected behaviour");
+        } catch (ProductNotFoundException e) {
+            fail("Product not found");
+        }
+    }
+
+    @Test
+    public void testDeleteProductWhichIsMissing() {
+        try {
+            productDao.delete(1000L);
+            fail("Unexpected behaviour");
+        } catch (ProductNotFoundException ignored) {
+
+        }
+    }
+
+    @Test
+    public void testDeleteProductWithNullValuePassed() {
+        try {
+            productDao.delete(null);
+        } catch (ProductNotFoundException e) {
+            fail("Unexpected behaviour");
+        }
     }
 }
