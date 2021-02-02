@@ -1,6 +1,7 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.model.product.ArrayListProductDao;
+import com.es.phoneshop.model.product.Product;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -37,6 +41,11 @@ public class ProductListPageServletTest {
     @Before
     public void setup() {
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+        Currency usd = Currency.getInstance("USD");
+        Product product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
+        List<Product> productList = new ArrayList<>();
+        productList.add(product);
+        when(productDao.findProducts()).thenReturn(productList);
     }
 
     @Test
@@ -47,6 +56,6 @@ public class ProductListPageServletTest {
 
         ArgumentCaptor<List> argumentCaptor = ArgumentCaptor.forClass(List.class);
         verify(request).setAttribute(eq("products"), argumentCaptor.capture());
-        assertEquals(argumentCaptor.getValue(), productDao.findProducts());
+        assertEquals(((Product) argumentCaptor.getValue().get(0)).getCode(), "test-product");
     }
 }
