@@ -28,11 +28,39 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public synchronized List<Product> findProducts() {
-        return products.stream()
+    public synchronized List<Product> findProducts(String query) {
+        String[] queryWords = splitToWords(query);
+        List<Product> unsortedList = products.stream()
+                .filter(product -> query == null || query.isEmpty() ||
+                        isContainingQueryWords(product.getDescription(), queryWords))
                 .filter(product -> product.getPrice() != null)
                 .filter(product -> product.getStock() > 0)
                 .collect(Collectors.toList());
+        if (queryWords == null) {
+            return unsortedList;
+        } else {
+            return unsortedList.stream()
+                    .sorted(Comparator.comparing(product -> queryRelevance(((Product) product).getDescription(), queryWords))
+                            .reversed())
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private String[] splitToWords(String query) {
+        String[] queryWords = null;
+        if (query != null && !query.isEmpty()) {
+            queryWords = query.split("\\s+");
+        }
+        return queryWords;
+    }
+
+    private boolean isContainingQueryWords(String productDescription, String[] queryWords) {
+        return Arrays.stream(queryWords).anyMatch(productDescription::contains);
+    }
+
+    private Double queryRelevance(String productDescription, String[] queryWords) {
+        return (double) Arrays.stream(queryWords).filter(productDescription::contains).count() /
+                splitToWords(productDescription).length;
     }
 
     @Override
