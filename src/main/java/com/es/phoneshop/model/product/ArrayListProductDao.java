@@ -28,37 +28,54 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public synchronized List<Product> findProducts(String query) {
-        String[] queryWords = splitToWords(query);
-        List<Product> unsortedList = products.stream()
-                .filter(product -> query == null || query.isEmpty() ||
-                        isContainingQueryWords(product.getDescription(), queryWords))
+    public synchronized List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder) {
+        List<Product> processingProducts = products.stream()
                 .filter(product -> product.getPrice() != null)
                 .filter(product -> product.getStock() > 0)
                 .collect(Collectors.toList());
-        if (queryWords == null) {
-            return unsortedList;
-        } else {
-            return unsortedList.stream()
-                    .sorted(Comparator.comparing(product -> queryRelevance(((Product) product).getDescription(), queryWords))
-                            .reversed())
-                    .collect(Collectors.toList());
+
+        if (query != null && !query.isEmpty()) {
+            processingProducts = getQueriedProducts(processingProducts, query);
         }
+
+        if (sortField != null && sortOrder != null) {
+            processingProducts = getSortedProducts(processingProducts, sortField, sortOrder);
+        }
+
+        return processingProducts;
+    }
+
+    private List<Product> getSortedProducts(List<Product> products, SortField sortField, SortOrder sortOrder) {
+        Comparator<Product> fieldComparator = (sortField == SortField.description)
+                ? Comparator.comparing(Product::getDescription)
+                : Comparator.comparing(Product::getPrice);
+        if (sortOrder == SortOrder.desc) {
+            fieldComparator = fieldComparator.reversed();
+        }
+
+        return products.stream()
+                .sorted(fieldComparator)
+                .collect(Collectors.toList());
+    }
+
+    private List<Product> getQueriedProducts(List<Product> products, String query) {
+        String[] queryWords = splitToWords(query);
+
+        return products.stream()
+                .filter(product -> isContainingQueryWords(product.getDescription(), queryWords))
+                .sorted(Comparator.comparing(product -> getQueryRelevance(((Product) product).getDescription(), queryWords)).reversed())
+                .collect(Collectors.toList());
     }
 
     private String[] splitToWords(String query) {
-        String[] queryWords = null;
-        if (query != null && !query.isEmpty()) {
-            queryWords = query.split("\\s+");
-        }
-        return queryWords;
+        return query.split("\\s+");
     }
 
     private boolean isContainingQueryWords(String productDescription, String[] queryWords) {
         return Arrays.stream(queryWords).anyMatch(productDescription::contains);
     }
 
-    private Double queryRelevance(String productDescription, String[] queryWords) {
+    private Double getQueryRelevance(String productDescription, String[] queryWords) {
         return (double) Arrays.stream(queryWords).filter(productDescription::contains).count() /
                 splitToWords(productDescription).length;
     }
