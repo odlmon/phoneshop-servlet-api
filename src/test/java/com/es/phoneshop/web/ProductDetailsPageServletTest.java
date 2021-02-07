@@ -1,9 +1,8 @@
 package com.es.phoneshop.web;
 
 import com.es.phoneshop.model.product.ArrayListProductDao;
+import com.es.phoneshop.model.product.NullValuePassedException;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.SortField;
-import com.es.phoneshop.model.product.SortOrder;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,7 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ProductListPageServletTest {
+public class ProductDetailsPageServletTest {
     @Mock
     private HttpServletRequest request;
     @Mock
@@ -36,30 +35,29 @@ public class ProductListPageServletTest {
     @Mock
     private ArrayListProductDao productDao;
     @InjectMocks
-    private ProductListPageServlet servlet = new ProductListPageServlet();
+    private ProductDetailsPageServlet servlet = new ProductDetailsPageServlet();
 
     @Before
-    public void setup() {
+    public void setup() throws NullValuePassedException {
+        Long id = 1L;
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
+        when(request.getPathInfo()).thenReturn("/" + id.toString());
         Currency usd = Currency.getInstance("USD");
-        Product product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
+        Product product = new Product(id, "test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
         List<Product> productList = new ArrayList<>();
         productList.add(product);
-        when(request.getParameter("query")).thenReturn("Samsung");
-        when(request.getParameter("sort")).thenReturn("price");
-        when(request.getParameter("order")).thenReturn("asc");
-        when(productDao.findProducts("Samsung", SortField.price, SortOrder.asc)).thenReturn(productList);
+        when(productDao.getProduct(id)).thenReturn(product);
     }
 
     @Test
-    public void testDoGet() throws ServletException, IOException {
+    public void testDoGet() throws ServletException, IOException, NullValuePassedException {
         servlet.doGet(request, response);
+
+        verify(request).getPathInfo();
 
         verify(requestDispatcher).forward(request, response);
 
-        verify(productDao).findProducts("Samsung", SortField.price, SortOrder.asc);
-
-        List<Product> productList = productDao.findProducts("Samsung", SortField.price, SortOrder.asc);
-        verify(request).setAttribute("products", productList);
+        Product product = productDao.getProduct(1L);
+        verify(request).setAttribute("product", product);
     }
 }
