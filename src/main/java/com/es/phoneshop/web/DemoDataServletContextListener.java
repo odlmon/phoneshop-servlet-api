@@ -19,7 +19,10 @@ public class DemoDataServletContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        saveSampleProducts();
+        boolean insertDemoData = Boolean.parseBoolean(servletContextEvent.getServletContext().getInitParameter("insertDemoData"));
+        if (insertDemoData) {
+            saveSampleProducts();
+        }
     }
 
     @Override
