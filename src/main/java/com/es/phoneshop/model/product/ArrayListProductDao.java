@@ -98,13 +98,13 @@ public class ArrayListProductDao implements ProductDao {
             throw new NullValuePassedException();
         }
         if (product.getId() != null) {
-            add(product);
-        } else {
             update(product);
+        } else {
+            add(product);
         }
     }
 
-    private void add(Product product) {
+    private void update(Product product) {
         Long id = product.getId();
         Optional<Product> optionalProduct = products.stream()
                 .filter(p -> id.equals(p.getId()))
@@ -116,7 +116,7 @@ public class ArrayListProductDao implements ProductDao {
         }
     }
 
-    private void update(Product product) {
+    private void add(Product product) {
         product.setId(maxId++);
         products.add(product);
     }
