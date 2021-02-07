@@ -1,7 +1,11 @@
 package com.es.phoneshop.model.product;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Currency;
+import java.util.Date;
+import java.util.List;
 
 public class Product {
     private Long id;
@@ -13,6 +17,7 @@ public class Product {
     private Currency currency;
     private int stock;
     private String imageUrl;
+    private List<PriceDate> priceHistory;
 
     public Product() {
     }
@@ -25,6 +30,8 @@ public class Product {
         this.currency = currency;
         this.stock = stock;
         this.imageUrl = imageUrl;
+        this.priceHistory = new ArrayList<>();
+        priceHistory.add(new PriceDate(new Date(), price));
     }
 
     public Product(String code, String description, BigDecimal price, Currency currency, int stock, String imageUrl) {
@@ -34,6 +41,8 @@ public class Product {
         this.currency = currency;
         this.stock = stock;
         this.imageUrl = imageUrl;
+        this.priceHistory = new ArrayList<>();
+        priceHistory.add(new PriceDate(new Date(), price));
     }
 
     public Long getId() {
@@ -66,6 +75,11 @@ public class Product {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+
+        if (priceHistory == null) {
+            this.priceHistory = new ArrayList<>();
+        }
+        priceHistory.add(new PriceDate(new Date(), price));
     }
 
     public Currency getCurrency() {
@@ -90,5 +104,13 @@ public class Product {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public List<PriceDate> getPriceHistory() {
+        return priceHistory;
+    }
+
+    public void setPriceHistory(List<PriceDate> priceHistory) {
+        this.priceHistory = priceHistory;
     }
 }
