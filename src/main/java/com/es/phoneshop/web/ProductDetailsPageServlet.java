@@ -26,7 +26,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
         try {
             request.setAttribute("product", productDao.getProduct(Long.valueOf(productId.substring(1))));
         } catch (NullValuePassedException e) {
-            throw new RuntimeException("Null value passed");
+            throw new RuntimeException("Null value passed", e);
         }
         request.getRequestDispatcher("/WEB-INF/pages/productDetails.jsp").forward(request, response);
     }

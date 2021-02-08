@@ -1,5 +1,7 @@
 package com.es.phoneshop.web;
 
+import com.es.phoneshop.model.product.ArrayListProductDao;
+import com.es.phoneshop.model.product.NullValuePassedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,9 +12,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DemoDataServletContextListenerTest {
@@ -20,19 +22,33 @@ public class DemoDataServletContextListenerTest {
     private ServletContextEvent event;
     @Mock
     private ServletContext servletContext;
+    @Mock
+    private ArrayListProductDao productDao;
     @InjectMocks
     private DemoDataServletContextListener listener = new DemoDataServletContextListener();
 
     @Before
     public void setup() {
         when(event.getServletContext()).thenReturn(servletContext);
-        when(servletContext.getInitParameter("insertDemoData")).thenReturn(String.valueOf(true));
     }
 
     @Test
-    public void testDoGet() {
+    public void testContextInitializedWithTrueInitParam() throws NullValuePassedException {
+        when(servletContext.getInitParameter("insertDemoData")).thenReturn(String.valueOf(true));
+
         listener.contextInitialized(event);
 
         verify(event.getServletContext()).getInitParameter(eq("insertDemoData"));
+        verify(productDao, atLeast(1)).save(any());
+    }
+
+    @Test
+    public void testContextInitializedWithFalseInitParam() throws NullValuePassedException {
+        when(servletContext.getInitParameter("insertDemoData")).thenReturn(String.valueOf(false));
+
+        listener.contextInitialized(event);
+
+        verify(event.getServletContext()).getInitParameter(eq("insertDemoData"));
+        verify(productDao, times(0)).save(any());
     }
 }

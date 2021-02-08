@@ -19,7 +19,8 @@ public class DemoDataServletContextListener implements ServletContextListener {
 
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        boolean insertDemoData = Boolean.parseBoolean(servletContextEvent.getServletContext().getInitParameter("insertDemoData"));
+        String initParameter = servletContextEvent.getServletContext().getInitParameter("insertDemoData");
+        boolean insertDemoData = Boolean.parseBoolean(initParameter);
         if (insertDemoData) {
             saveSampleProducts();
         }
@@ -49,5 +50,9 @@ public class DemoDataServletContextListener implements ServletContextListener {
         } catch (NullValuePassedException e) {
             System.out.println("Null value passed to method");
         }
+    }
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
     }
 }

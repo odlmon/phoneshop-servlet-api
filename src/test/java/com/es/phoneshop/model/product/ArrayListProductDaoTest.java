@@ -26,8 +26,8 @@ public class ArrayListProductDaoTest
     public void setup() throws NoSuchFieldException, IllegalAccessException {
         usd = Currency.getInstance("USD");
         product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        productDao = (ArrayListProductDao) ArrayListProductDao.getInstance();
         resetSingleton();
+        productDao = (ArrayListProductDao) ArrayListProductDao.getInstance();
         try {
             productDao.save(new Product("sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg"));
             productDao.save(new Product("sgs2", "Samsung Galaxy S II", new BigDecimal(200), usd, 0, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20II.jpg"));

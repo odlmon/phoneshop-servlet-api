@@ -40,23 +40,39 @@ public class ArrayListProductDao implements ProductDao {
 
     @Override
     public synchronized List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder) {
-        List<Product> processingProducts = products.stream()
+        List<Product> productList = products.stream()
                 .filter(product -> product.getPrice() != null)
                 .filter(product -> product.getStock() > 0)
                 .collect(Collectors.toList());
 
-        if (query != null && !query.isEmpty()) {
-            processingProducts = getQueriedProducts(processingProducts, query);
+        boolean isQueried = query != null && !query.isEmpty();
+        boolean isSorting = sortField != null && sortOrder != null;
+        Map<Product, Double> productRelevance = null;
+
+        if (isQueried) {
+            productRelevance = getProductRelevance(productList, query);
+            productList = getQueriedProducts(productList, productRelevance);
         }
 
-        if (sortField != null && sortOrder != null) {
-            processingProducts = getSortedProducts(processingProducts, sortField, sortOrder);
+        if (isSorting) {
+            productList = sortByFieldAndOrder(productList, sortField, sortOrder);
+        } else if (isQueried && productRelevance != null) {
+            productList = sortByProductRelevance(productList, productRelevance);
         }
 
-        return processingProducts;
+        return productList;
     }
 
-    private List<Product> getSortedProducts(List<Product> products, SortField sortField, SortOrder sortOrder) {
+    private Map<Product, Double> getProductRelevance(List<Product> productStream, String query) {
+        String[] queryWords = splitToWords(query);
+
+        return productStream.stream().collect(Collectors.toMap(
+                product -> product,
+                product -> getQueryRelevance(product.getDescription(), queryWords)
+        ));
+    }
+
+    private List<Product> sortByFieldAndOrder(List<Product> productList, SortField sortField, SortOrder sortOrder) {
         Comparator<Product> fieldComparator = (sortField == SortField.description)
                 ? Comparator.comparing(Product::getDescription)
                 : Comparator.comparing(Product::getPrice);
@@ -64,26 +80,25 @@ public class ArrayListProductDao implements ProductDao {
             fieldComparator = fieldComparator.reversed();
         }
 
-        return products.stream()
+        return productList.stream()
                 .sorted(fieldComparator)
                 .collect(Collectors.toList());
     }
 
-    private List<Product> getQueriedProducts(List<Product> products, String query) {
-        String[] queryWords = splitToWords(query);
+    private List<Product> sortByProductRelevance(List<Product> productList, Map<Product, Double> productRelevance) {
+        return productList.stream()
+                .sorted(Comparator.comparing(productRelevance::get).reversed())
+                .collect(Collectors.toList());
+    }
 
-        return products.stream()
-                .filter(product -> isContainingQueryWords(product.getDescription(), queryWords))
-                .sorted(Comparator.comparing(product -> getQueryRelevance(((Product) product).getDescription(), queryWords)).reversed())
+    private List<Product> getQueriedProducts(List<Product> productList, Map<Product, Double> productRelevance) {
+        return productList.stream()
+                .filter(product -> productRelevance.get(product) > 0)
                 .collect(Collectors.toList());
     }
 
     private String[] splitToWords(String query) {
         return query.split("\\s+");
-    }
-
-    private boolean isContainingQueryWords(String productDescription, String[] queryWords) {
-        return Arrays.stream(queryWords).anyMatch(productDescription::contains);
     }
 
     private Double getQueryRelevance(String productDescription, String[] queryWords) {

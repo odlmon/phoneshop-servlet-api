@@ -17,7 +17,7 @@ public class Product {
     private Currency currency;
     private int stock;
     private String imageUrl;
-    private List<PriceDate> priceHistory;
+    private List<PriceDate> priceHistory = new ArrayList<>();
 
     public Product() {
     }
@@ -30,7 +30,6 @@ public class Product {
         this.currency = currency;
         this.stock = stock;
         this.imageUrl = imageUrl;
-        this.priceHistory = new ArrayList<>();
         priceHistory.add(new PriceDate(new Date(), price));
     }
 
@@ -41,7 +40,6 @@ public class Product {
         this.currency = currency;
         this.stock = stock;
         this.imageUrl = imageUrl;
-        this.priceHistory = new ArrayList<>();
         priceHistory.add(new PriceDate(new Date(), price));
     }
 
@@ -74,6 +72,10 @@ public class Product {
     }
 
     public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public void setPriceWithHistory(BigDecimal price) {
         this.price = price;
 
         if (priceHistory == null) {

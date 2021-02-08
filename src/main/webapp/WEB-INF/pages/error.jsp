@@ -5,5 +5,5 @@
 <%@ page isErrorPage="true" %>
 
 <tags:master pageTitle="Error">
-    <h1>Sorry an error occured</h1>
+    <h1>Sorry an error occurred</h1>
 </tags:master>
