@@ -3,8 +3,10 @@ package com.es.phoneshop.model.product;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Currency;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -14,16 +16,32 @@ public class ArrayListProductDaoTest
     private Currency usd;
     private Product product;
 
+    private void resetSingleton() throws NoSuchFieldException, IllegalAccessException {
+        Field instance = ArrayListProductDao.class.getDeclaredField("instance");
+        instance.setAccessible(true);
+        instance.set(null, null);
+    }
+
     @Before
-    public void setup() {
-        productDao = new ArrayListProductDao();
+    public void setup() throws NoSuchFieldException, IllegalAccessException {
         usd = Currency.getInstance("USD");
         product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
+        resetSingleton();
+        productDao = (ArrayListProductDao) ArrayListProductDao.getInstance();
+        try {
+            productDao.save(new Product("sgs", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg"));
+            productDao.save(new Product("sgs2", "Samsung Galaxy S II", new BigDecimal(200), usd, 0, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20II.jpg"));
+            productDao.save(new Product("sgs3", "Samsung Galaxy S III", new BigDecimal(300), usd, 5, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S%20III.jpg"));
+        } catch (NullValuePassedException e) {
+            System.out.println("Null value passed");
+        }
     }
 
     @Test
-    public void testFindProductsNoResults() {
-        assertFalse(productDao.findProducts().isEmpty());
+    public void testGetInstance() {
+        ProductDao productDao1 = ArrayListProductDao.getInstance();
+        ProductDao productDao2 = ArrayListProductDao.getInstance();
+        assertSame(productDao1, productDao2);
     }
 
     @Test
@@ -63,6 +81,30 @@ public class ArrayListProductDaoTest
         } catch (ProductNotFoundException e) {
             assertNull(product);
         }
+    }
+
+    @Test
+    public void testFindProductsWithNullParams() {
+        assertFalse(productDao.findProducts(null, null, null).isEmpty());
+    }
+
+    @Test
+    public void testFindProductsWithQuery() {
+        List<Product> products = productDao.findProducts("S III", null, null);
+        assertEquals(products.get(0).getCode(), "sgs3");
+        assertEquals(products.size(), 2);
+    }
+
+    @Test
+    public void testFindProductsWithSort() {
+        List<Product> products = productDao.findProducts(null, SortField.price, SortOrder.asc);
+        assertTrue(products.get(0).getPrice().compareTo(products.get(1).getPrice()) <= 0);
+    }
+
+    @Test
+    public void testFindProductsWithQueryAndSort() {
+        List<Product> products = productDao.findProducts("S III", SortField.description, SortOrder.desc);
+        assertEquals(products.get(0).getCode(), "sgs3");
     }
 
     @Test
@@ -124,9 +166,9 @@ public class ArrayListProductDaoTest
     public void testDeleteProduct() {
         try {
             productDao.save(product);
-            int beforeSize = productDao.findProducts().size();
+            int beforeSize = productDao.findProducts(null, null, null).size();
             productDao.delete(product.getId());
-            int afterSize = productDao.findProducts().size();
+            int afterSize = productDao.findProducts(null, null, null).size();
             assertNotEquals(afterSize, beforeSize);
         } catch (NullValuePassedException e) {
             fail("Unexpected behaviour");
