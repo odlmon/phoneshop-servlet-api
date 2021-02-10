@@ -1,7 +1,7 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.model.product.ArrayListProductDao;
-import com.es.phoneshop.model.product.NullValuePassedException;
+import com.es.phoneshop.dao.impl.ArrayListProductDao;
+import com.es.phoneshop.exception.NullValuePassedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

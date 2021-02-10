@@ -1,9 +1,11 @@
 package com.es.phoneshop.web;
 
-import com.es.phoneshop.model.product.ArrayListProductDao;
+import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.SortField;
-import com.es.phoneshop.model.product.SortOrder;
+import com.es.phoneshop.model.product.RecentlyViewedProducts;
+import com.es.phoneshop.model.enums.SortField;
+import com.es.phoneshop.model.enums.SortOrder;
+import com.es.phoneshop.service.impl.HttpSessionRecentlyViewedProductsService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +37,8 @@ public class ProductListPageServletTest {
     private RequestDispatcher requestDispatcher;
     @Mock
     private ArrayListProductDao productDao;
+    @Mock
+    private HttpSessionRecentlyViewedProductsService recentlyViewedProductsService;
     @InjectMocks
     private ProductListPageServlet servlet = new ProductListPageServlet();
 
@@ -42,13 +46,17 @@ public class ProductListPageServletTest {
     public void setup() {
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
         Currency usd = Currency.getInstance("USD");
-        Product product = new Product("test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
+        Product product = new Product(1L,"test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
         List<Product> productList = new ArrayList<>();
         productList.add(product);
         when(request.getParameter("query")).thenReturn("Samsung");
         when(request.getParameter("sort")).thenReturn("price");
         when(request.getParameter("order")).thenReturn("asc");
         when(productDao.findProducts("Samsung", SortField.price, SortOrder.asc)).thenReturn(productList);
+
+        RecentlyViewedProducts products = new RecentlyViewedProducts();
+        products.getItems().offer(product);
+        when(recentlyViewedProductsService.getRecentlyViewedProducts(request)).thenReturn(products);
     }
 
     @Test
@@ -61,5 +69,8 @@ public class ProductListPageServletTest {
 
         List<Product> productList = productDao.findProducts("Samsung", SortField.price, SortOrder.asc);
         verify(request).setAttribute("products", productList);
+
+        RecentlyViewedProducts products = recentlyViewedProductsService.getRecentlyViewedProducts(request);
+        verify(request).setAttribute("recentlyViewed", products);
     }
 }
