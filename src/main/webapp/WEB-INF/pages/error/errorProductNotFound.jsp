@@ -4,6 +4,6 @@
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 <%@ page isErrorPage="true" %>
 
-<tags:master pageTitle="Error">
-    <h1>Sorry an error occurred</h1>
+<tags:master pageTitle="Product not found">
+  <h1>Product not found by id ${pageContext.exception.id}</h1>
 </tags:master>

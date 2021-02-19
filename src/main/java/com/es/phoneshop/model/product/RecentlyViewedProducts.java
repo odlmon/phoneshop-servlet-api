@@ -1,9 +1,10 @@
 package com.es.phoneshop.model.product;
 
+import java.io.Serializable;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class RecentlyViewedProducts {
+public class RecentlyViewedProducts implements Serializable {
     private Queue<Product> items;
 
     public RecentlyViewedProducts() {

@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.product;
 
 import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.exception.NullValuePassedException;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 

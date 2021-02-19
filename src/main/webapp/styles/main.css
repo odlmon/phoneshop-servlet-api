@@ -21,7 +21,7 @@ td {
   border : 1px solid gray;
   vertical-align: top;
 }
-.price, input.quantity {
+.price, .quantity {
   text-align: right;
 }
 img.product-tile {

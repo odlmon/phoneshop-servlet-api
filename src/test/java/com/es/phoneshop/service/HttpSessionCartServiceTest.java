@@ -98,4 +98,55 @@ public class HttpSessionCartServiceTest {
         Cart cart = cartService.getCart(request);
         cartService.add(cart, null, 1);
     }
+
+    @Test
+    public void testUpdate() throws NullValuePassedException, OutOfStockException {
+        Cart cart = cartService.getCart(request);
+        cartService.update(cart, 1L, 1);
+        assertEquals(1, cart.getItems().get(0).getQuantity());
+        cartService.update(cart, 1L, 4);
+        assertEquals(4, cart.getItems().get(0).getQuantity());
+    }
+
+    @Test(expected = OutOfStockException.class)
+    public void testUpdateNonPresentProductWithOutOfStock() throws OutOfStockException, NullValuePassedException {
+        Cart cart = cartService.getCart(request);
+        cartService.update(cart, 1L, 101);
+    }
+
+    @Test(expected = OutOfStockException.class)
+    public void testUpdatePresentProductWithOutOfStock() throws OutOfStockException, NullValuePassedException {
+        Cart cart = cartService.getCart(request);
+        cartService.update(cart, 1L, 1);
+        cartService.update(cart, 1L, 101);
+    }
+
+    @Test(expected = NullValuePassedException.class)
+    public void testUpdateWithNullValueIdPassed() throws OutOfStockException, NullValuePassedException {
+        Cart cart = cartService.getCart(request);
+        cartService.update(cart, null, 1);
+    }
+
+    @Test
+    public void testDelete() throws NullValuePassedException, OutOfStockException {
+        Cart cart = cartService.getCart(request);
+        cartService.update(cart, 1L, 1);
+        assertEquals(1, cart.getItems().get(0).getQuantity());
+        cartService.delete(cart, 1L);
+        assertEquals(0, cart.getItems().size());
+    }
+
+    @Test
+    public void testDeleteWithNullValueIdPassed() throws NullValuePassedException {
+        Cart cart = cartService.getCart(request);
+        cartService.delete(cart, null);
+        assertEquals(0, cart.getItems().size());
+    }
+
+    @Test
+    public void testDeleteNonPresentProduct() throws NullValuePassedException {
+        Cart cart = cartService.getCart(request);
+        cartService.delete(cart, 2L);
+        assertEquals(0, cart.getItems().size());
+    }
 }

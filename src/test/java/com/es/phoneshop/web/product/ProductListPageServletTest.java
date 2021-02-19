@@ -1,10 +1,14 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.product;
 
 import com.es.phoneshop.dao.impl.ArrayListProductDao;
-import com.es.phoneshop.model.product.Product;
-import com.es.phoneshop.model.product.RecentlyViewedProducts;
+import com.es.phoneshop.exception.NullValuePassedException;
+import com.es.phoneshop.exception.OutOfStockException;
+import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.enums.SortField;
 import com.es.phoneshop.model.enums.SortOrder;
+import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.model.product.RecentlyViewedProducts;
+import com.es.phoneshop.service.impl.HttpSessionCartService;
 import com.es.phoneshop.service.impl.HttpSessionRecentlyViewedProductsService;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,8 +26,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +45,8 @@ public class ProductListPageServletTest {
     private ArrayListProductDao productDao;
     @Mock
     private HttpSessionRecentlyViewedProductsService recentlyViewedProductsService;
+    @Mock
+    private HttpSessionCartService cartService;
     @InjectMocks
     private ProductListPageServlet servlet = new ProductListPageServlet();
 
@@ -57,6 +65,10 @@ public class ProductListPageServletTest {
         RecentlyViewedProducts products = new RecentlyViewedProducts();
         products.getItems().offer(product);
         when(recentlyViewedProductsService.getRecentlyViewedProducts(request)).thenReturn(products);
+
+        when(request.getParameter("productId")).thenReturn("1");
+        when(request.getParameter("quantity")).thenReturn("1");
+        when(request.getLocale()).thenReturn(Locale.getDefault());
     }
 
     @Test
@@ -72,5 +84,18 @@ public class ProductListPageServletTest {
 
         RecentlyViewedProducts products = recentlyViewedProductsService.getRecentlyViewedProducts(request);
         verify(request).setAttribute("recentlyViewed", products);
+    }
+
+    @Test
+    public void testDoPost() throws ServletException, IOException, NullValuePassedException, OutOfStockException {
+        servlet.doPost(request, response);
+
+        verify(request).getParameter(eq("productId"));
+        verify(request).getParameter(eq("quantity"));
+
+        Cart cart = cartService.getCart(request);
+        verify(cartService).add(cart, 1L, 1);
+
+        verify(response).sendRedirect(anyString());
     }
 }

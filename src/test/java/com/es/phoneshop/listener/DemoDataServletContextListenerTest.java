@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.listener;
 
 import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.exception.NullValuePassedException;

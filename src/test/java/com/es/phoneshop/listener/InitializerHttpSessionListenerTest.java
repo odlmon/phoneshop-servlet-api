@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.listener;
 
 import com.es.phoneshop.service.impl.HttpSessionCartService;
 import com.es.phoneshop.service.impl.HttpSessionRecentlyViewedProductsService;

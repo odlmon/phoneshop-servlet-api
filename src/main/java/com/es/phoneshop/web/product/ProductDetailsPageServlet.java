@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.product;
 
 import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.exception.NullValuePassedException;
@@ -51,7 +51,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             request.setAttribute("product", productDao.getProduct(productId));
             request.setAttribute("cart", cartService.getCart(request));
             request.setAttribute("recentlyViewed", products);
-            request.getRequestDispatcher("/WEB-INF/pages/productDetails.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/product/productDetails.jsp").forward(request, response);
             recentlyViewedProductsService.add(products, productId);
         } catch (NullValuePassedException e) {
             throw new RuntimeException("Null value passed", e);
@@ -71,7 +71,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
             Long productId = getProductId(request);
             int quantity = getQuantity(request);
             if (quantity < 1) {
-                handleError(request, response, "Quantity can't be negative");
+                handleError(request, response, "Quantity can't be negative or zero");
                 return;
             }
             Cart cart = cartService.getCart(request);
