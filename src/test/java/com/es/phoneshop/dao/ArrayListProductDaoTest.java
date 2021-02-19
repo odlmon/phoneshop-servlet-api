@@ -1,5 +1,11 @@
-package com.es.phoneshop.model.product;
+package com.es.phoneshop.dao;
 
+import com.es.phoneshop.dao.impl.ArrayListProductDao;
+import com.es.phoneshop.exception.NullValuePassedException;
+import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.model.enums.SortField;
+import com.es.phoneshop.model.enums.SortOrder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,8 +16,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class ArrayListProductDaoTest
-{
+public class ArrayListProductDaoTest {
     private ArrayListProductDao productDao;
     private Currency usd;
     private Product product;

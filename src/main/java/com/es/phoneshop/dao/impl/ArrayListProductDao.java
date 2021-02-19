@@ -1,19 +1,23 @@
-package com.es.phoneshop.model.product;
+package com.es.phoneshop.dao.impl;
 
+import com.es.phoneshop.dao.ProductDao;
+import com.es.phoneshop.exception.NullValuePassedException;
+import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.model.enums.SortField;
+import com.es.phoneshop.model.enums.SortOrder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class ArrayListProductDao implements ProductDao {
     private static volatile ProductDao instance;
 
-    private long maxId;
-    private List<Product> products;
-
-    private ArrayListProductDao() {
-        this.products = new ArrayList<>();
-    }
+    private AtomicLong maxId = new AtomicLong(0);
+    private List<Product> products = new CopyOnWriteArrayList<>();
 
     public static ProductDao getInstance() {
         if (instance == null) {
@@ -27,7 +31,7 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public synchronized Product getProduct(@Nullable Long id) throws ProductNotFoundException, NullValuePassedException {
+    public Product getProduct(@Nullable Long id) throws ProductNotFoundException, NullValuePassedException {
         if (id == null) {
             throw new NullValuePassedException();
         }
@@ -39,12 +43,17 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public synchronized List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder) {
+    public List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder) {
         List<Product> productList = products.stream()
                 .filter(product -> product.getPrice() != null)
                 .filter(product -> product.getStock() > 0)
                 .collect(Collectors.toList());
 
+        return processProductList(productList, query, sortField, sortOrder);
+    }
+
+    private List<Product> processProductList(List<Product> productList, String query, SortField sortField,
+                                             SortOrder sortOrder) {
         boolean isQueried = query != null && !query.isEmpty();
         boolean isSorting = sortField != null && sortOrder != null;
         Map<Product, Double> productRelevance = null;
@@ -107,7 +116,7 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public synchronized void save(@Nullable Product product) throws NullValuePassedException {
+    public void save(@Nullable Product product) throws NullValuePassedException {
         if (product == null) {
             throw new NullValuePassedException();
         }
@@ -131,12 +140,12 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     private void add(Product product) {
-        product.setId(maxId++);
+        product.setId(maxId.incrementAndGet());
         products.add(product);
     }
 
     @Override
-    public synchronized void delete(@Nullable Long id) throws ProductNotFoundException {
+    public void delete(@Nullable Long id) throws ProductNotFoundException {
         if (id == null) {
             return;
         }
