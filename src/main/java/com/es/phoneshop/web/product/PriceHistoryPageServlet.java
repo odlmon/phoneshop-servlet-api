@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.web.product;
 
 import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.exception.NullValuePassedException;
@@ -28,7 +28,7 @@ public class PriceHistoryPageServlet extends HttpServlet {
         } catch (NullValuePassedException e) {
             throw new RuntimeException("Null value passed");
         }
-        request.getRequestDispatcher("/WEB-INF/pages/productPriceHistory.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/pages/product/productPriceHistory.jsp").forward(request, response);
     }
 
     public void setProductDao(ProductDao productDao) {

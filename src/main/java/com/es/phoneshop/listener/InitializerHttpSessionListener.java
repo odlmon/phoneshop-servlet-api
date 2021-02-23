@@ -1,4 +1,4 @@
-package com.es.phoneshop.web;
+package com.es.phoneshop.listener;
 
 import com.es.phoneshop.model.cart.Cart;
 import com.es.phoneshop.model.product.RecentlyViewedProducts;
