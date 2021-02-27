@@ -61,7 +61,7 @@ public class ProductDetailsPageServletTest {
         Product product = new Product(id, "test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
         List<Product> productList = new ArrayList<>();
         productList.add(product);
-        when(productDao.getProduct(id)).thenReturn(product);
+        when(productDao.getItem(id)).thenReturn(product);
 
         Cart cart = new Cart();
         cart.getItems().add(new CartItem(product, 1));
@@ -80,7 +80,7 @@ public class ProductDetailsPageServletTest {
 
         verify(requestDispatcher).forward(request, response);
 
-        Product product = productDao.getProduct(1L);
+        Product product = productDao.getItem(1L);
         verify(request).setAttribute("product", product);
         Cart cart = cartService.getCart(request);
         verify(request).setAttribute("cart", cart);

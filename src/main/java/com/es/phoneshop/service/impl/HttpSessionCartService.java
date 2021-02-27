@@ -12,12 +12,15 @@ import com.es.phoneshop.service.CartService;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class HttpSessionCartService implements CartService {
     private static volatile CartService instance;
 
     public static final String CART_SESSION_ATTRIBUTE = HttpSessionCartService.class.getName() + ".cart";
     private ProductDao productDao;
+    private ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private HttpSessionCartService() {
         productDao = ArrayListProductDao.getInstance();
@@ -41,7 +44,7 @@ public class HttpSessionCartService implements CartService {
 
     @Override
     public void add(Cart cart, Long productId, int quantity) throws OutOfStockException, NullValuePassedException {
-        Product product = productDao.getProduct(productId);
+        Product product = productDao.getItem(productId);
         Optional<CartItem> optionalCartItem = findCartItem(cart, productId);
         if (optionalCartItem.isPresent()) {
             addToPresent(product, quantity, optionalCartItem.get());
@@ -53,7 +56,7 @@ public class HttpSessionCartService implements CartService {
 
     @Override
     public void update(Cart cart, Long productId, int quantity) throws OutOfStockException, NullValuePassedException {
-        Product product = productDao.getProduct(productId);
+        Product product = productDao.getItem(productId);
         Optional<CartItem> optionalCartItem = findCartItem(cart, productId);
         if (optionalCartItem.isPresent()) {
             updatePresent(product, quantity, optionalCartItem.get());
@@ -72,24 +75,33 @@ public class HttpSessionCartService implements CartService {
         recalculateCart(cart);
     }
 
-    private void recalculateCart(Cart cart) {
-        while (!(recalculateTotalQuantity(cart) && recalculateTotalCost(cart))) ;
+    @Override
+    public void clearCart(HttpServletRequest request) {
+        request.getSession().setAttribute(CART_SESSION_ATTRIBUTE, new Cart());
     }
 
-    private boolean recalculateTotalQuantity(Cart cart) {
-        int currentTotalQuantity = cart.getTotalQuantity().get();
+    private void recalculateCart(Cart cart) {
+        lock.writeLock().lock();
+        try {
+            recalculateTotalQuantity(cart);
+            recalculateTotalCost(cart);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    private void recalculateTotalQuantity(Cart cart) {
         int newTotalQuantity = cart.getItems().stream()
                 .mapToInt(CartItem::getQuantity)
                 .sum();
-        return cart.getTotalQuantity().compareAndSet(currentTotalQuantity, newTotalQuantity);
+        cart.setTotalQuantity(newTotalQuantity);
     }
 
-    private boolean recalculateTotalCost(Cart cart) {
-        BigDecimal currentTotalCost = cart.getTotalCost().get();
+    private void recalculateTotalCost(Cart cart) {
         BigDecimal newTotalCost = cart.getItems().stream()
                 .map(this::getCartItemCost)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return cart.getTotalCost().compareAndSet(currentTotalCost, newTotalCost);
+        cart.setTotalCost(newTotalCost);
     }
 
     private BigDecimal getCartItemCost(CartItem cartItem) {

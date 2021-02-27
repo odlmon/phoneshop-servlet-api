@@ -11,4 +11,5 @@ public interface CartService {
     void add(Cart cart, Long productId, int quantity) throws OutOfStockException, NullValuePassedException;
     void update(Cart cart, Long productId, int quantity) throws OutOfStockException, NullValuePassedException;
     void delete(Cart cart, Long productId) throws NullValuePassedException;
+    void clearCart(HttpServletRequest request);
 }

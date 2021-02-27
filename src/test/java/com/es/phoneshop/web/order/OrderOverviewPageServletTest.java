@@ -1,8 +1,8 @@
-package com.es.phoneshop.web.product;
+package com.es.phoneshop.web.order;
 
-import com.es.phoneshop.dao.impl.ArrayListProductDao;
+import com.es.phoneshop.dao.OrderDao;
 import com.es.phoneshop.exception.NullValuePassedException;
-import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.model.order.Order;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,17 +15,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Currency;
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PriceHistoryPageServletTest {
+public class OrderOverviewPageServletTest {
     @Mock
     private HttpServletRequest request;
     @Mock
@@ -33,31 +29,23 @@ public class PriceHistoryPageServletTest {
     @Mock
     private RequestDispatcher requestDispatcher;
     @Mock
-    private ArrayListProductDao productDao;
+    private OrderDao orderDao;
     @InjectMocks
-    private PriceHistoryPageServlet servlet = new PriceHistoryPageServlet();
+    private OrderOverviewPageServlet servlet = new OrderOverviewPageServlet();
 
     @Before
     public void setup() throws NullValuePassedException {
-        Long id = 1L;
         when(request.getRequestDispatcher(anyString())).thenReturn(requestDispatcher);
-        when(request.getPathInfo()).thenReturn("/" + id.toString());
-        Currency usd = Currency.getInstance("USD");
-        Product product = new Product(id, "test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
-        List<Product> productList = new ArrayList<>();
-        productList.add(product);
-        when(productDao.getItem(id)).thenReturn(product);
+
+        when(request.getPathInfo()).thenReturn("/1");
+        when(orderDao.getOrderBySecureId("1")).thenReturn(new Order());
     }
 
     @Test
     public void testDoGet() throws ServletException, IOException, NullValuePassedException {
         servlet.doGet(request, response);
 
-        verify(request).getPathInfo();
-
+        verify(request).setAttribute("order", orderDao.getOrderBySecureId("1"));
         verify(requestDispatcher).forward(request, response);
-
-        Product product = productDao.getItem(1L);
-        verify(request).setAttribute("product", product);
     }
 }

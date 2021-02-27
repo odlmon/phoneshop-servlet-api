@@ -1,23 +1,24 @@
 package com.es.phoneshop.dao.impl;
 
+import com.es.phoneshop.dao.AbstractArrayListDao;
 import com.es.phoneshop.dao.ProductDao;
-import com.es.phoneshop.exception.NullValuePassedException;
-import com.es.phoneshop.exception.ProductNotFoundException;
-import com.es.phoneshop.model.product.Product;
+import com.es.phoneshop.exception.ItemNotFoundException;
 import com.es.phoneshop.model.enums.SortField;
 import com.es.phoneshop.model.enums.SortOrder;
+import com.es.phoneshop.model.product.Product;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ArrayListProductDao implements ProductDao {
+public class ArrayListProductDao extends AbstractArrayListDao<Product> implements ProductDao {
     private static volatile ProductDao instance;
 
-    private AtomicLong maxId = new AtomicLong(0);
-    private List<Product> products = new CopyOnWriteArrayList<>();
+    private ArrayListProductDao() {
+    }
 
     public static ProductDao getInstance() {
         if (instance == null) {
@@ -31,25 +32,25 @@ public class ArrayListProductDao implements ProductDao {
     }
 
     @Override
-    public Product getProduct(@Nullable Long id) throws ProductNotFoundException, NullValuePassedException {
-        if (id == null) {
-            throw new NullValuePassedException();
-        }
-
-        return products.stream()
-                .filter(product -> id.equals(product.getId()))
-                .findAny()
-                .orElseThrow(() -> new ProductNotFoundException(id));
-    }
-
-    @Override
     public List<Product> findProducts(String query, SortField sortField, SortOrder sortOrder) {
-        List<Product> productList = products.stream()
+        List<Product> productList = items.stream()
                 .filter(product -> product.getPrice() != null)
                 .filter(product -> product.getStock() > 0)
                 .collect(Collectors.toList());
 
         return processProductList(productList, query, sortField, sortOrder);
+    }
+
+    @Override
+    public void delete(@Nullable Long id) throws ItemNotFoundException {
+        if (id == null) {
+            return;
+        }
+        Product deletingProduct = items.stream()
+                .filter(product -> id.equals(product.getId()))
+                .findAny()
+                .orElseThrow(() -> new ItemNotFoundException(id));
+        items.remove(deletingProduct);
     }
 
     private List<Product> processProductList(List<Product> productList, String query, SortField sortField,
@@ -113,46 +114,5 @@ public class ArrayListProductDao implements ProductDao {
     private Double getQueryRelevance(String productDescription, String[] queryWords) {
         return (double) Arrays.stream(queryWords).filter(productDescription::contains).count() /
                 splitToWords(productDescription).length;
-    }
-
-    @Override
-    public void save(@Nullable Product product) throws NullValuePassedException {
-        if (product == null) {
-            throw new NullValuePassedException();
-        }
-        if (product.getId() != null) {
-            update(product);
-        } else {
-            add(product);
-        }
-    }
-
-    private void update(Product product) {
-        Long id = product.getId();
-        Optional<Product> optionalProduct = products.stream()
-                .filter(p -> id.equals(p.getId()))
-                .findAny();
-        if (!optionalProduct.isPresent()) {
-            products.add(product);
-        } else {
-            Collections.replaceAll(products, optionalProduct.get(), product);
-        }
-    }
-
-    private void add(Product product) {
-        product.setId(maxId.incrementAndGet());
-        products.add(product);
-    }
-
-    @Override
-    public void delete(@Nullable Long id) throws ProductNotFoundException {
-        if (id == null) {
-            return;
-        }
-        Product deletingProduct = products.stream()
-                .filter(product -> id.equals(product.getId()))
-                .findAny()
-                .orElseThrow(() -> new ProductNotFoundException(id));
-        products.remove(deletingProduct);
     }
 }

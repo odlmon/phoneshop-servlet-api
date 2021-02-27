@@ -1,5 +1,7 @@
 package com.es.phoneshop.model.product;
 
+import com.es.phoneshop.model.Identifiable;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -7,7 +9,7 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.List;
 
-public class Product implements Serializable {
+public class Product implements Serializable, Identifiable<Long> {
     private Long id;
     private String code;
     private String description;
@@ -43,10 +45,12 @@ public class Product implements Serializable {
         priceHistory.add(new PriceDate(new Date(), price));
     }
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public void setId(Long id) {
         this.id = id;
     }
