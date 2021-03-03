@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Currency;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.junit.Assert.*;
 
@@ -53,8 +54,8 @@ public class HttpSessionCartServiceTest {
         Product product = new Product(id, "test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
         List<Product> productList = new ArrayList<>();
         productList.add(product);
-        when(productDao.getProduct(id)).thenReturn(product);
-        when(productDao.getProduct(null)).thenThrow(NullValuePassedException.class);
+        when(productDao.getItem(id)).thenReturn(product);
+        when(productDao.getItem(null)).thenThrow(NullValuePassedException.class);
     }
 
     @Test
@@ -148,5 +149,11 @@ public class HttpSessionCartServiceTest {
         Cart cart = cartService.getCart(request);
         cartService.delete(cart, 2L);
         assertEquals(0, cart.getItems().size());
+    }
+
+    @Test
+    public void testClearCart() {
+        cartService.clearCart(request);
+        verify(session).setAttribute(eq(HttpSessionCartService.CART_SESSION_ATTRIBUTE), any(Cart.class));
     }
 }

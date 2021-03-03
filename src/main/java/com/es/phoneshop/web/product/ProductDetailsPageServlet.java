@@ -48,7 +48,7 @@ public class ProductDetailsPageServlet extends HttpServlet {
         Long productId = getProductId(request);
         RecentlyViewedProducts products = recentlyViewedProductsService.getRecentlyViewedProducts(request);
         try {
-            request.setAttribute("product", productDao.getProduct(productId));
+            request.setAttribute("product", productDao.getItem(productId));
             request.setAttribute("cart", cartService.getCart(request));
             request.setAttribute("recentlyViewed", products);
             request.getRequestDispatcher("/WEB-INF/pages/product/productDetails.jsp").forward(request, response);

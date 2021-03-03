@@ -24,7 +24,7 @@ public class PriceHistoryPageServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String productId = request.getPathInfo();
         try {
-            request.setAttribute("product", productDao.getProduct(Long.valueOf(productId.substring(1))));
+            request.setAttribute("product", productDao.getItem(Long.valueOf(productId.substring(1))));
         } catch (NullValuePassedException e) {
             throw new RuntimeException("Null value passed");
         }

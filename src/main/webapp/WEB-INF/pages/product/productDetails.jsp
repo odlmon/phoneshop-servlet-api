@@ -37,11 +37,7 @@
         <td>Quantity</td>
         <td>
           <input class="quantity" name="quantity" value="${not empty error ? param.quantity : 1}">
-          <c:if test="${not empty error}">
-            <div class="error">
-                ${error}
-            </div>
-          </c:if>
+          <tags:optionalErrorMessage error="${error}"/>
         </td>
       </tr>
     </table>

@@ -43,7 +43,7 @@ public class HttpSessionRecentlyViewedProductsService implements RecentlyViewedP
                 .filter(product -> productId.equals(product.getId()))
                 .findFirst();
         if (!optionalProduct.isPresent()) {
-            Product product = productDao.getProduct(productId);
+            Product product = productDao.getItem(productId);
             if (products.getItems().size() == RECENTLY_VIEWED_PRODUCTS_AMOUNT) {
                 products.getItems().poll();
             }

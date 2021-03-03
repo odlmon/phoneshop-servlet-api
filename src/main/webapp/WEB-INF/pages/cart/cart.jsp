@@ -34,11 +34,7 @@
             <c:set var="error" value="${errors[item.product.id]}"/>
             <input name="quantity" class="quantity"
                    value="${not empty error ? paramValues.quantity[status.index] : item.quantity}"/>
-            <c:if test="${not empty error}">
-              <div class="error">
-                  ${error}
-              </div>
-            </c:if>
+            <tags:optionalErrorMessage error="${error}"/>
             <input name="productId" type="hidden" value="${item.product.id}"/>
           </td>
           <td class="price">
@@ -57,22 +53,18 @@
       </c:forEach>
       <c:if test="${not empty cart.items}">
         <tr>
-          <td>Total</td>
-          <td></td>
-          <td class="quantity">
-              <fmt:formatNumber value="${cart.totalQuantity.get()}"/>
-          </td>
-          <td class="price">
-              <fmt:formatNumber value="${cart.totalCost.get()}" type="currency"
-                                currencySymbol="${cart.items.get(0).product.currency.symbol}"/>
-          </td>
+          <tags:tableInfo title="Total:" quantity="${cart.totalQuantity}" price="${cart.totalCost}"
+                        currency="${cart.items.get(0).product.currency.symbol}"/>
           <td></td>
         </tr>
       </c:if>
     </table>
     <p>
       <button>Update</button>
+      <button form="checkoutLink">Checkout</button>
     </p>
+  </form>
+  <form id="checkoutLink" action="${pageContext.servletContext.contextPath}/checkout">
   </form>
   <form id="deleteCartItem" method="post">
   </form>

@@ -60,11 +60,11 @@ public class HttpSessionRecentlyViewedProductsServiceTest {
         productList.add(product2);
         productList.add(product3);
         productList.add(product4);
-        when(productDao.getProduct(id)).thenReturn(product1);
-        when(productDao.getProduct(2L)).thenReturn(product2);
-        when(productDao.getProduct(3L)).thenReturn(product3);
-        when(productDao.getProduct(4L)).thenReturn(product4);
-        when(productDao.getProduct(null)).thenThrow(NullValuePassedException.class);
+        when(productDao.getItem(id)).thenReturn(product1);
+        when(productDao.getItem(2L)).thenReturn(product2);
+        when(productDao.getItem(3L)).thenReturn(product3);
+        when(productDao.getItem(4L)).thenReturn(product4);
+        when(productDao.getItem(null)).thenThrow(NullValuePassedException.class);
     }
 
     @Test

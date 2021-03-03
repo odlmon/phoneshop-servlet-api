@@ -2,7 +2,7 @@ package com.es.phoneshop.dao;
 
 import com.es.phoneshop.dao.impl.ArrayListProductDao;
 import com.es.phoneshop.exception.NullValuePassedException;
-import com.es.phoneshop.exception.ProductNotFoundException;
+import com.es.phoneshop.exception.ItemNotFoundException;
 import com.es.phoneshop.model.product.Product;
 import com.es.phoneshop.model.enums.SortField;
 import com.es.phoneshop.model.enums.SortOrder;
@@ -53,11 +53,11 @@ public class ArrayListProductDaoTest {
     public void testGetProducts() {
         try {
             productDao.save(product);
-            Product savedProduct = productDao.getProduct(product.getId());
+            Product savedProduct = productDao.getItem(product.getId());
             assertEquals(product.getCode(), savedProduct.getCode());
         } catch (NullValuePassedException e) {
             fail("Null value passed");
-        } catch (ProductNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             fail("Product not found");
         }
     }
@@ -66,11 +66,11 @@ public class ArrayListProductDaoTest {
     public void testGetProductWithNullValuePassed() {
         Product product = null;
         try {
-            product = productDao.getProduct(null);
+            product = productDao.getItem(null);
             fail("Unexpected behaviour");
         } catch (NullValuePassedException e) {
             assertNull(product);
-        } catch (ProductNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             fail("Unexpected behaviour");
         }
     }
@@ -79,11 +79,11 @@ public class ArrayListProductDaoTest {
     public void testGetProductWhichIsMissing() {
         Product product = null;
         try {
-            product = productDao.getProduct(1000L);
+            product = productDao.getItem(1000L);
             fail("Unexpected behaviour");
         } catch (NullValuePassedException e) {
             fail("Unexpected behaviour");
-        } catch (ProductNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             assertNull(product);
         }
     }
@@ -116,11 +116,11 @@ public class ArrayListProductDaoTest {
     public void testSaveNewProduct() {
         try {
             productDao.save(product);
-            Product savedProduct = productDao.getProduct(product.getId());
+            Product savedProduct = productDao.getItem(product.getId());
             assertEquals(product.getCode(), savedProduct.getCode());
         } catch (NullValuePassedException e) {
             fail("Unexpected behaviour");
-        } catch (ProductNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             fail("Product not found");
         }
     }
@@ -129,16 +129,16 @@ public class ArrayListProductDaoTest {
     public void testSaveModifiedProduct() {
         try {
             productDao.save(product);
-            Product modifiedProduct = productDao.getProduct(product.getId());
+            Product modifiedProduct = productDao.getItem(product.getId());
             modifiedProduct.setCode("test-product1");
             Long oldId = product.getId();
             productDao.save(modifiedProduct);
-            modifiedProduct = productDao.getProduct(oldId);
+            modifiedProduct = productDao.getItem(oldId);
             assertEquals(oldId, modifiedProduct.getId());
             assertNotEquals(null, "test-product", modifiedProduct.getCode());
         } catch (NullValuePassedException e) {
             fail("Unexpected behaviour");
-        } catch (ProductNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             fail("Product not found");
         }
     }
@@ -149,10 +149,10 @@ public class ArrayListProductDaoTest {
         Product product = new Product(predefinedId,"test-product", "Samsung Galaxy S", new BigDecimal(100), usd, 100, "https://raw.githubusercontent.com/andrewosipenko/phoneshop-ext-images/master/manufacturer/Samsung/Samsung%20Galaxy%20S.jpg");
         try {
             productDao.save(product);
-            productDao.getProduct(predefinedId);
+            productDao.getItem(predefinedId);
         } catch (NullValuePassedException e) {
             fail("Unexpected behaviour");
-        } catch (ProductNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             fail("Product not found");
         }
     }
@@ -177,7 +177,7 @@ public class ArrayListProductDaoTest {
             assertNotEquals(afterSize, beforeSize);
         } catch (NullValuePassedException e) {
             fail("Unexpected behaviour");
-        } catch (ProductNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             fail("Product not found");
         }
     }
@@ -187,7 +187,7 @@ public class ArrayListProductDaoTest {
         try {
             productDao.delete(1000L);
             fail("Unexpected behaviour");
-        } catch (ProductNotFoundException ignored) {
+        } catch (ItemNotFoundException ignored) {
 
         }
     }
@@ -196,7 +196,7 @@ public class ArrayListProductDaoTest {
     public void testDeleteProductWithNullValuePassed() {
         try {
             productDao.delete(null);
-        } catch (ProductNotFoundException e) {
+        } catch (ItemNotFoundException e) {
             fail("Unexpected behaviour");
         }
     }

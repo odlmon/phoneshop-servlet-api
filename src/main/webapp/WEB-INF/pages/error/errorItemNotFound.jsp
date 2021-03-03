@@ -4,6 +4,7 @@
 <%@ taglib prefix="tags" tagdir="/WEB-INF/tags" %>
 <%@ page isErrorPage="true" %>
 
-<tags:master pageTitle="Product not found">
-  <h1>Product not found by id ${pageContext.exception.id}</h1>
+<tags:master pageTitle="Item not found">
+  <c:set var="id" value="${pageContext.exception.id}"/>
+  <h1>Item not found ${not empty id ? 'by '.concat(id) : ''}</h1>
 </tags:master>
