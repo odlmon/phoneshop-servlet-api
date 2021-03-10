@@ -40,7 +40,7 @@ public class DefaultAdvancedSearchService implements AdvancedSearchService {
     public List<Product> searchProducts(String description, SearchType searchType, BigDecimal minPrice, BigDecimal maxPrice) {
         List<Product> productList = this.getAllProducts();
 
-        if (description != null && !description.equals("")) {
+        if (description != null && !description.isEmpty()) {
             String[] descriptionWords = splitToWords(description);
             if (searchType == SearchType.ALL_WORDS) {
                 productList = findByAllWords(productList, descriptionWords);

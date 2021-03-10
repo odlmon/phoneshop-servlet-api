@@ -29,7 +29,7 @@ public class AdvancedSearchPageServlet extends HttpServlet {
 
     private BigDecimal getPrice(HttpServletRequest request, String priceString, String errorName) {
         try {
-            if (!priceString.equals("")) {
+            if (!priceString.isEmpty()) {
                 return new BigDecimal(priceString);
             }
         } catch (NumberFormatException e) {
@@ -53,8 +53,8 @@ public class AdvancedSearchPageServlet extends HttpServlet {
             BigDecimal minPrice = getPrice(request, minPriceString, "minPriceError");
             BigDecimal maxPrice = getPrice(request, maxPriceString, "maxPriceError");
 
-            boolean wasMinError = minPrice == null && !minPriceString.equals("");
-            boolean wasMaxError = maxPrice == null && !maxPriceString.equals("");
+            boolean wasMinError = minPrice == null && !minPriceString.isEmpty();
+            boolean wasMaxError = maxPrice == null && !maxPriceString.isEmpty();
             if (!wasMinError && !wasMaxError) {
                 List<Product> productList = advancedSearchService.searchProducts(description, searchType, minPrice, maxPrice);
                 request.setAttribute("products", productList);
