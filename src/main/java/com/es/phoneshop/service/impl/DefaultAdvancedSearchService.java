@@ -81,17 +81,19 @@ public class DefaultAdvancedSearchService implements AdvancedSearchService {
         return query.split("\\s+");
     }
 
-    private boolean containsAllWords(String description, String[] descriptionWords) {
-        String[] filtered = Arrays.stream(descriptionWords)
+    private String[] filterByDescription(String description, String[] descriptionWords) {
+        return Arrays.stream(descriptionWords)
                 .filter(description::contains)
                 .toArray(String[]::new);
+    }
+
+    private boolean containsAllWords(String description, String[] descriptionWords) {
+        String[] filtered = filterByDescription(description, descriptionWords);
         return filtered.length == descriptionWords.length;
     }
 
     private boolean containsAnyWord(String description, String[] descriptionWords) {
-        String[] filtered = Arrays.stream(descriptionWords)
-                .filter(description::contains)
-                .toArray(String[]::new);
+        String[] filtered = filterByDescription(description, descriptionWords);
         return filtered.length > 0;
     }
 
