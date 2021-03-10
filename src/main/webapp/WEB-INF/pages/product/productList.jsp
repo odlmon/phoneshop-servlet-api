@@ -12,6 +12,9 @@
   <form>
     <input name="query" value="${param.query}">
     <button>Search</button>
+    <button form="advancedSearchLink">Go to advanced search</button>
+  </form>
+  <form id="advancedSearchLink" action="${pageContext.servletContext.contextPath}/advancedSearch">
   </form>
   <tags:status message="${param.message}" hasError="${not empty error}"/>
   <table>
